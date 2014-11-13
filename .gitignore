@@ -8,13 +8,39 @@
 *.gch
 *.pch
 
+# Autotools
+**/Makefile
+**/Makefile.in
+/aclocal.m4
+/autom4te.cache/
+/ar-lib
+/config.*
+/configure
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/missing
+/stamp-h?
+.deps/
+.dirstamp
+
+# DejaGnu
+**/out.pcap
+*.log
+*.sum
+**/site.bak
+**/site.exp
+
+# KDeveloper
+*.kdev4
+*.kdev_include_paths
+*.kate-swp
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
 
 # Compiled Static libraries
 *.lai
@@ -26,3 +52,5 @@
 *.exe
 *.out
 *.app
+pktanon
+anontester
