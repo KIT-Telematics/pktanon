@@ -1,0 +1,13 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ICMP6-NA-IDEN"
+
+if { ![exec_pktanon iden_na.xml icmp6_na.pcap] } { break; }
+
+test_field "icmpv6.type"  136 
+test_field "icmpv6.code"  0
+test_field "icmpv6.checksum"  "0x78fd"
+test_checksum_r "icmpv6"
+test_field "icmpv6.nd.na.flag"  "40:00:00:00"
+test_field "icmpv6.nd.na.target_address"  "fe80::7ae7:d1ff:fe84:4e06"
+
+warning "what to do with RSO flags?"

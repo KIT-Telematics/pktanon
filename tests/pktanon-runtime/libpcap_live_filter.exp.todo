@@ -1,0 +1,54 @@
+set test "test libpcap live input"
+puts "warning: this test requires root privileges"
+
+source lib/tshark_utils.exp
+
+log_user 0
+if { $verbose >= 0 } { log_user 1 }
+if { $verbose > 0 } { puts "================== $test =================="}
+
+# test sudo working: ######################################################
+
+try {
+    set results [exec sudo -nv ]
+    set status 0
+} trap CHILDSTATUS {results options} {
+    set status [lindex [dict get $options -errorcode] 2]
+}
+
+if {$status != 0} {fail "$test: cannot execute sudo pktanon"}
+
+# spawn pktanon: ###########################################################
+spawn  sudo ../../src/pktanon -i lo -e "not arp" ../out.pcap
+expect {
+  initialized { }
+  eof {fail $test; exit 1}
+  timeout { fail $test }
+}
+set spawn_pktanon $spawn_id
+
+# send packets to lo using tcpreplay: ######################################
+spawn sudo tcpreplay -i lo -t -l 1 trace.pcap
+expect {
+  -re "Successful packets:\[ \]*(\[0-9\]+)" { set pkts_sent [expr { $expect_out(1,string) }]; wait }
+  eof { set pkts_sent unknown}
+}
+
+# wait some time and kill pktanon: ##########################################
+sleep 1
+exec sudo killall pktanon
+
+# count number of frames in result and number of frames matching filter in original file: 
+set pkts_matched [count_frames trace.pcap "not arp"]
+set pkts_rcvd [count_frames ../out.pcap]
+
+
+# test that pktanon received all the packets: ##########################################
+if { $verbose > 0 } {
+  puts "\n\nnumber of pkts sent  = $pkts_matched"
+  puts "number of pkts rcved = $pkts_rcvd"
+}
+
+if { $pkts_matched == $pkts_rcvd} {pass $test} {
+  fail "$test: expected $pkts_matched packets, actual $pkts_rcvd packets"
+}

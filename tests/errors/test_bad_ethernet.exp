@@ -1,0 +1,15 @@
+#
+# test for correct messages by mailformed packets
+#
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/errorstestlib.exp"]
+set trace_file [file join $script_dir bad_ethernet.pcap]
+
+set_test [info script] 
+
+spawn $PKTANON -c $anon_profile $trace_file $out_file
+
+expect_error_in_packet 2 "ethernet header too short"
+expect_error_in_packet 3 "ethernet header too short"
+expect_total_errors 2
+wait

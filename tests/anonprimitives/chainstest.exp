@@ -1,0 +1,24 @@
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/anontestlib.exp"]
+
+set test [info script] 
+
+vputs "\n>>>  AnonBroadcastHandler/AnonConstOverwrite ========================================\n"
+set params {"value" "0x2b"} 
+set anons {"AnonBroadcastHandler" "AnonConstOverwrite"}
+anon_chain_test $params $anons "-----" "+++++"
+# # TODO
+set params {"value" "0x2b" "hex_output" "1"} 
+anon_chain_test $params $anons "#ffffffffff" "ffffffffff"
+
+vputs "\n>>>  AnonConstOverwrite/AnonShorten ========================================\n"
+set params {"value" "0x2b" "newlen" "3"} 
+set anons {"AnonConstOverwrite" "AnonShorten"}
+anon_chain_test $params $anons "-----" "+++"
+set anons {"AnonShorten" "AnonConstOverwrite"}
+anon_chain_test $params $anons "-----" "+++"
+
+vputs "\n>>>  several primitives ========================================\n"
+set params {"value" "0x2b" "newlen" "3"} 
+set anons {"AnonBroadcastHandler" "AnonBroadcastHandler" "AnonBroadcastHandler" "AnonConstOverwrite" "AnonShorten"}
+anon_chain_test $params $anons "-----" "+++"

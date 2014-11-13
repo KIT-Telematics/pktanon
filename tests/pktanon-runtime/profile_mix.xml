@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pktanon-config>
+  
+  <anonymizations>
+    
+    <packet protocol="ethernet">
+      <field name="mac-source" anon="AnonHashHmacSha1" key="KEY"/>
+      <field name="mac-dest" anon="AnonHashHmacSha1" key="KEY"/>
+      <field name="ethertype" anon="AnonIdentity" />
+    </packet>
+     
+    <packet protocol="arp">
+      <field name="hardware-type" anon="AnonIdentity"/> 
+      <field name="protocol-type" anon="AnonIdentity"/>
+      <field name="hardware-size" anon="AnonIdentity"/>
+      <field name="protocol-size" anon="AnonIdentity"/>
+      <field name="opcode" 	anon="AnonIdentity"/>
+      <field name="sender-mac" 	anon="AnonHashHmacSha1" key="KEY"/>
+      <field name="sender-ip"	anon="AnonHashSha1" />
+      <field name="target-mac"	anon="AnonHashHmacSha1" key="KEY"/>
+      <field name="target-ip"	anon="AnonHashSha1"/>
+    </packet>
+
+    <packet protocol="ip">
+      <field name="tos" 	anon="AnonConstOverwrite" value="0x00"/>
+      <field name="identification" 	anon="AnonIdentity"/>
+      <field name="flags" 	anon="AnonIdentity"/>
+      <field name="fragment" 	anon="AnonIdentity"/>
+      <field name="ttl" 	anon="AnonWhitenoise" strength="7"/>
+      <field name="protocol" 	anon="AnonIdentity"/>
+      <field name="src-ip" 	anon="AnonHashSha1"/>
+      <field name="dest-ip" 	anon="AnonHashSha1"/>
+      <field name="options" 	anon="AnonShorten" newlen="0"/>
+    </packet>
+    
+    <packet protocol="ipv6">
+      <field name="traffic-class" anon="AnonIdentity"/>
+      <field name="flow-label" 	anon="AnonIdentity"/>
+      <field name="hop-limit" 	anon="AnonWhitenoise" strength="7"/>
+      <field name="src-ip" 	anon="AnonHashSha256"/>
+      <field name="dest-ip" 	anon="AnonHashSha256"/>
+      <field name="next-header" anon="AnonIdentity"/>
+    </packet>
+    
+    <packet protocol="tcp">
+      <field name="source-port" anon="AnonRandomize"/>
+      <field name="dest-port"	anon="AnonRandomize"/>
+      <field name="seq" 	anon="AnonWhitenoise" strength="2"/>
+      <field name="ack" 	anon="AnonWhitenoise" strength="2"/>
+      <field name="flags" 	anon="AnonIdentity"/>
+      <field name="window-size"    anon="AnonWhitenoise" strength="4"/>
+      <field name="urgent-pointer" anon="AnonConstOverwrite" value="0x00" />
+      <field name="options"	   anon="AnonShorten" newlen="0"/>
+    </packet>
+    
+    <packet protocol="udp">
+      <field name="source-port" anon="AnonRandomize"/>
+      <field name="dest-port" anon="AnonRandomize"/>
+    </packet>
+    
+    <packet protocol="icmp">
+      <field name="type" anon="AnonIdentity" />
+      <field name="code" anon="AnonIdentity" />
+      <field name="rest" anon="AnonIdentity" />
+    </packet>
+    
+    <packet protocol="icmpv6">
+      <field name="type" anon="AnonIdentity" />
+      <field name="code" anon="AnonIdentity" />
+      <field name="rest" anon="AnonIdentity" />
+      <field name="target-address" anon="AnonHashSha256"/>
+    </packet>
+    
+    <packet protocol="payload">
+      <field name="payload" anon="AnonShorten" newlen="0"/>
+    </packet>
+    
+  </anonymizations>  
+</pktanon-config>

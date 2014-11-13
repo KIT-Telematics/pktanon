@@ -1,0 +1,91 @@
+#
+# test libpcap-capture - udp-socket combination
+#
+
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/runtimetestlib.exp"]
+
+set_test [info script] 
+
+set pkt_ifname lo
+set port 8888
+
+#### test pktanon listening to interface and sending output to udp socket
+
+# start nmap in ipv6/udp mode
+spawn -noecho ncat -6 -u -l $port 
+
+# spawn pktanon
+spawn sudo $PKTANON -c $anon_profile -i $pkt_ifname -o ::1:$port -6 -u
+expect {
+  initialized {
+      set pktanon_initialized 1
+#     match_io_logs "libpcap"
+  }
+  eof {fail "$test pktanon failed to initialize"; break;}
+  timeout {fail "$test pktanon failed to initialize"; break;}
+}
+set pktanon_spawn_id $spawn_id
+
+
+log_user 0
+
+# start tshark that counts frames
+spawn -noecho sudo tshark -i lo -q -z io,stat,0
+expect "Loopback"
+# doesn't work without it
+sleep 2
+set tshark_spawn_id $spawn_id
+
+# send trace_file on lo and count the packets sent
+spawn sudo tcpreplay -i lo -t -l 1 $trace_file
+expect {
+  -re "Successful packets:\[ \]*(\[0-9\]+)" { set pkts_sent [expr { $expect_out(1,string) }]; wait; }
+  eof { 
+    set pkts_sent unknown
+    unsupported "$test - failed to send packets with tcpreplay"
+   }
+}
+
+# stop pktanon and count packets sent
+log_user $log_user_original
+set spawn_id $pktanon_spawn_id
+
+send \x03
+send \x03
+
+expect {
+  -re "processed packets:\[ \]*(\[0-9\]+)" { set pkts_processed [expr { $expect_out(1,string) }]; wait; }
+  eof {fail "$test pktanon failed"; break; }
+  timeout {fail "$test pktanon failed"; break;}
+}
+
+log_user 0
+set spawn_id $tshark_spawn_id
+# doesn't work without it
+sleep 2
+
+send \x03
+send \x03
+expect eof
+
+set pkts_captured [count_frames_in_output $expect_out(buffer)]
+
+## for some reasons pktanon processes twice the number of pkts being sent
+## and doesn't go into infinite loop
+if { $verbose > 0} {
+  puts "\npkts sent = $pkts_sent"
+  puts "pkts processed = $pkts_processed"
+  puts "pkts captured = $pkts_captured"
+}
+
+if { $pkts_processed < $pkts_sent} { fail " pktanon didn't process enough packets"}
+if { $pkts_captured < ($pkts_sent + $pkts_processed) } { fail " pktanon didn't sent enough packets on output interface"}
+
+log_user $log_user_original
+
+# TODO: this
+# TODO: test with stdin,stdout and io pipes 
+# TODO: ipv6 forwarding header
+# TODO: disallow libpcap-dump to not libpcap
+# TODO: remove / move error-codes to pktanon / something so that there is no need to include something other than packetanon / error-codes

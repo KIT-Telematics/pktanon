@@ -1,0 +1,46 @@
+proc anon_value_test { anon_class params src exp_dst } {
+  global test
+  global ANONTESTER
+  spawn $ANONTESTER
+  
+ foreach param_name [dict keys $params] {
+    set param_value [dict get $params $param_name]
+    expect "enter command:"
+    send "p $param_name $param_value\n"
+  }
+  
+  expect "enter command:"
+  send "a $anon_class\n"
+  expect "enter command:"
+  send "v $src\n"
+  expect -re "result = {(.*)}" { set value [expr { $expect_out(1,string) }];}
+  expect "enter command:"
+  send "q"  
+  if { $value == $exp_dst } { pass $test } { 
+    fail "$test\texp: {$exp_dst}\n\t\tres: {$value}" }
+}
+
+proc anon_chain_test { params anons buffer expected_result } {
+  global test
+  global ANONTESTER
+  spawn $ANONTESTER
+  
+ foreach param_name [dict keys $params] {
+    set param_value [dict get $params $param_name]
+    expect "enter command:"
+    send "p $param_name $param_value\n"
+  }
+  
+  foreach anon_class $anons {
+    expect "enter command:"
+    send "a $anon_class\n"
+  }
+  
+  expect "enter command:"
+  send "v $buffer\n"
+  expect -re "result = {(.*)}" { set value [expr { $expect_out(1,string) }];}
+  expect "enter command:"
+  send "q"  
+  if { $value == $expected_result } { pass $test } { 
+    fail "$test\texp: {$expected_result}\n\t\tres: {$value}" }
+}

@@ -1,0 +1,13 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "IPv6"
+
+if { ![exec_pktanon mix.xml ip6.pcap] } { break; }
+
+test_field "ipv6.version" 6 
+test_field "ipv6.class" 0x00000015 
+test_field "ipv6.flow" 0x00081818 
+test_field "ipv6.plen" 0
+test_field "ipv6.nxt" 58 
+test_field "ipv6.hlim" 5
+test_field "ipv6.src" "abab:abab:abab:abab:abab:abab:abab:abab"
+test_field "ipv6.dst" "cdcd:cdcd:cdcd:cdcd:cdcd:cdcd:cdcd:cdcd" 

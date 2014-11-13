@@ -1,0 +1,23 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "IP6-TCP-CHECKSUM"
+
+if { ![exec_pktanon tcp_checksum.xml ip6_tcp.pcap] } { break; }
+
+test_field "ipv6.version" 6 
+test_field "ipv6.class" 0x00000000 
+test_field "ipv6.flow" 0x00000000 
+test_field "ipv6.plen" 20
+test_field "ipv6.nxt" 6 
+test_field "ipv6.hlim" 53
+test_field "ipv6.src" "2001:7c0:0:1010::d"
+test_field "ipv6.dst" "cdcd:cdcd:cdcd:cdcd:cdcd:cdcd:cdcd:cdcd" 
+
+test_field "tcp.srcport"  443 
+test_field "tcp.dstport"  53642 
+test_field "tcp.seq"   1314112500 
+test_field "tcp.ack"   4056484319 
+test_field "tcp.hdr_len" 20 
+test_field "tcp.flags" 0x0010 
+test_field "tcp.window_size_value" 673 
+test_field "tcp.checksum" 0x25b1 
+test_checksum "tcp" 

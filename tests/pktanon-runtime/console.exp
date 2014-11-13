@@ -1,0 +1,51 @@
+#
+# small tests to test correct parsing of console options
+#
+
+proc expect_error_message {} {
+  global spawn_id
+  global test
+  
+  expect {
+    "Error:" {
+	expect {
+	  "initializing PktAnon" { fail "$test - pktanon should have exited" }
+	  eof { pass $test }
+	}
+    }
+    eof {fail "$test - expected error message"}
+  }
+}
+
+#----------------------------------------------------
+
+
+set test "test help message"
+spawn $PKTANON -h 
+expect {
+  "Usage" {
+    expect {
+      "verbose" { pass "$test - help message"}
+      eof { fail "$test - expected --verbose help string"}
+    }
+  }
+  eof { fail "$test - expected pktanon help" }
+}
+
+#----------------------------------------------------
+
+set test "test missing output file"
+spawn $PKTANON infile 
+expect_error_message
+
+#----------------------------------------------------
+
+set test "test too many files"
+spawn $PKTANON outfile
+expect_error_message
+
+#----------------------------------------------------
+
+set test "snaplen NaN"
+spawn $PKTANON -s abc infile outfile
+expect_error_message

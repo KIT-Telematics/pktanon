@@ -1,0 +1,73 @@
+#
+# test pktanon infile/outfile with std::io
+#
+
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/runtimetestlib.exp"]
+
+set_test [info script] 
+
+## test1:
+## run pktanon with default profile
+
+spawn $PKTANON -c $anon_profile $trace_file $out_file
+expect {
+  "complete" {
+      match_io_logs "istream"
+      match_io_logs "ostream"
+      expect eof
+  }
+  eof {
+    fail "$test: failed running pktanon with default profile"
+    break
+  }
+}
+
+## read number of packets and time
+set packets_iden 0
+set time_iden 0
+
+regexp {processed packets:\s*(\d+)} $expect_out(buffer) match packets_iden;
+regexp {\s(\d+)us} $expect_out(buffer) match time_iden;
+
+## compare stats in trace file and output file
+compare_stats $trace_file $out_file
+
+## test2:
+## run pktanon with non-default profile
+
+spawn $PKTANON -c $anon_profile_mix $trace_file $out_file
+expect {
+  "complete" {
+      match_io_logs "istream"
+      match_io_logs "ostream"
+    expect eof
+  }
+  eof {
+    fail "$test: failed running pktanon with non-default profile"
+    break;
+  }
+}
+
+## read number of packets and time
+set packets_mix 0
+set time_mix 0
+
+regexp {processed packets:\s*(\d+)} $expect_out(buffer) match packets_mix;
+regexp {\s(\d+)us} $expect_out(buffer) match time_mix;
+
+set expected_pkts 100;
+
+if {$verbose > 0} { 
+  puts "\n"
+  puts "expected pkts: $expected_pkts"
+  puts "results:"
+  puts " \tiden\tmix"
+  puts "pkts: \t$packets_iden\t$packets_mix"
+  puts "time: \t$time_iden\t$time_mix"
+  puts "\n"
+ }
+
+if {$packets_iden != $expected_pkts} { fail "$test - expected $expected_pkts, processed $packets_iden packets"; set test_passed 0;}
+if {$packets_mix != $expected_pkts}  { fail "$test - expected $expected_pkts, processed $packets_mix packets"; set test_passed 0;}
+if {$time_mix <= $time_iden}  { fail "$test - mixed profile shoud be slower than identity profile, actual times(us): iden=$time_iden,mix=$time_mix"; set test_passed 0;}

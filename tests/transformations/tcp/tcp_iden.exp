@@ -1,0 +1,14 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "TCP-IDEN"
+
+if { ![exec_pktanon iden.xml tcp.pcap] } { break; }
+
+test_field "tcp.srcport"  33777 
+test_field "tcp.dstport"  443 
+test_field "tcp.seq"   2439873758 
+test_field "tcp.ack"   1731612665 
+test_field "tcp.hdr_len" 20 
+test_field "tcp.flags" 0x0018 
+test_field "tcp.window_size_value" 29200 
+test_field "tcp.checksum" 0xdbd7 
+test_checksum "tcp" 

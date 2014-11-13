@@ -1,0 +1,12 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ICMP6-NS-IDEN"
+
+if { ![exec_pktanon iden_ns.xml icmp6_ns.pcap] } { break; }
+
+test_field "icmpv6.type"  135 
+test_field "icmpv6.code"  0
+test_field "icmpv6.checksum"  "0xb0fa"
+test_checksum_r "icmpv6"
+test_field "icmpv6.reserved"  "00:00:00:00"
+test_field "icmpv6.nd.ns.target_address"  "2a00:1398:2:4005:102a:fc8b:6d76:bb6e"
+

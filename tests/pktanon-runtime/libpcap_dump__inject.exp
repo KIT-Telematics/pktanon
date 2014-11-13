@@ -1,0 +1,39 @@
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/runtimetestlib.exp"]
+
+set_test [info script] 
+
+### file - libpcap-inct ############################################
+
+# start tshark
+spawn -noecho sudo tshark -i lo -q -z io,stat,0
+expect "Loopback"
+# doesn't work without it
+sleep 2
+set tshark_spawn_id $spawn_id
+
+# start pktanon
+spawn sudo $PKTANON -c $anon_profile -n lo $trace_file
+
+expect {
+  -re "processed packets:\[ \]*(\[0-9\]+)" { set pkts_sent [expr { $expect_out(1,string) }]; wait; }
+  eof {fail "$test pktanon failed to initialize"; break;}
+  timeout {fail "$test pktanon failed to initialize"; break;}
+}
+
+set spawn_id $tshark_spawn_id
+# doesn't work without it
+sleep 2
+
+send \x03
+send \x03
+expect eof
+
+set buff $expect_out(buffer)
+set found  [regexp -line -lineanchor {^\|\s0\.000[ <>0-9.]+\|\s*(\d+)} $buff match pkts_captured ]
+if { $found != 1} { fail $test }
+
+set pkts_in_trace_file [count_frames $trace_file]
+
+if { $pkts_sent != $pkts_in_trace_file } { fail $test "pktanon sent less files that there are in $trace_file"}
+if { $pkts_captured != $pkts_in_trace_file } { fail $test "less packets were captured on lo than in $trace_file"}

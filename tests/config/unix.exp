@@ -1,0 +1,40 @@
+if {![info exists TOP_SRC_DIR]} {
+  set pwd  [pwd];
+  set pwd [file split $pwd];
+  set pktanon_dir list
+  foreach path_element $pwd {
+    lappend pktanon_dir $path_element 
+    if { $path_element == "pktanon"} { break;}
+  }
+  set pktanon_dir [file join {*}$pktanon_dir]
+} else {
+  set pktanon_dir [file join [pwd] $TOP_SRC_DIR]
+}
+
+set pktanon_exec [file join $pktanon_dir pktanon]
+set top_tests_dir [file join $pktanon_dir tests]
+set anontester_exec [file join $top_tests_dir anontester]
+  
+if { [file exists $pktanon_exec] } { set PKTANON $pktanon_exec} { 
+   error "path to pktanon not found, if TOP_SRC_DIR is not pktanon, set TOP_SRC_DIR variable"
+}
+
+if { [file exists $anontester_exec] } { set ANONTESTER $anontester_exec} { 
+   error "path to pktanon not found, if TOP_SRC_DIR is not pktanon, set TOP_SRC_DIR variable"
+}
+
+set TESTS_DIR $top_tests_dir
+
+if {$verbose > 0} { log_user 1 }
+
+unset pktanon_dir
+unset pktanon_exec
+unset anontester_exec
+unset top_tests_dir
+
+proc vputs { msg } {
+  global verbose
+  if { $verbose > 0 } {
+    puts $msg
+  }  
+}

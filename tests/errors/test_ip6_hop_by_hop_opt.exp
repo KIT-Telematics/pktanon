@@ -1,0 +1,48 @@
+#
+# test that there is no error on traces with IPv6 Hop-by-Hop option
+#   Hop-by-Hop option has next_header value of 0 and causes problems when 
+#   finding transformations in hash table PHT.h
+#
+set script_dir [file dirname [info script]]
+set trace_file [file join $script_dir trace_hop_by_hop_opt.pcap]
+set out_file [file join $script_dir .. out.pcap]
+
+set profile1 [file join $script_dir eth_ip6.xml]
+set profile2 [file join $script_dir eth_ip6_icmp6.xml]
+set profile3 [file join $script_dir eth_ip6_tcp_udp.xml]
+
+set test [file rootname [ file tail [info script]]]
+#### test with eth_ip6 profile
+
+spawn $PKTANON -v -c $profile1 $trace_file $out_file
+expect {
+  "complete" {
+      expect eof
+  }
+  eof {
+    fail "$test: failed running pktanon with $profile1"
+#     break
+  }
+}
+
+# spawn $PKTANON -c $profile2 $trace_file $out_file
+# expect {
+#   "complete" {
+#       expect eof
+#   }
+#   eof {
+#     fail "$test: failed running pktanon with $profile1"
+# #     break
+#   }
+# }
+# 
+# spawn $PKTANON -c $profile3 $trace_file $out_file
+# expect {
+#   "complete" {
+#       expect eof
+#   }
+#   eof {
+#     fail "$test: failed running pktanon with $profile1"
+# #     break
+#   }
+# }

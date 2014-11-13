@@ -1,0 +1,128 @@
+### initialize variables
+set anon_profile [file join $script_dir  profile.xml]
+set anon_profile_mix [file join $script_dir  profile_mix.xml]
+
+set trace_file [file join $script_dir trace.pcap]
+set out_file [file join $script_dir .. out.pcap]
+
+set log_user_original [log_user -info]
+
+### test helpers
+
+proc vputs { msg } {
+  global verbose
+  if { $verbose > 0 } {
+    puts $msg
+  }  
+}
+
+proc set_test { script_name } {
+  global verbose
+  global test
+  set test [file rootname [ file tail $script_name]]
+  if { [info exists test] && $verbose > 0 } {
+    puts "================== $test =================="
+  }
+}
+
+proc match_io_logs {io_log_prefix} {
+  global test
+  global expect_out
+  if {![regexp -line -lineanchor "^$io_log_prefix:" $expect_out(buffer)]} { fail "$test pktanon is not using correct io"}
+}
+
+# count number of frames in pcap file
+#
+# tshark output is something like this
+# ===================================
+# | IO Statistics                   |
+# |                                 |
+# | Duration: 0.044 secs            |
+# | Interval: 0.044 secs            |
+# |                                 |
+# | Col 1: FRAMES                   |
+# |---------------------------------|
+# |                |1       |       |
+# | Interval       | FRAMES |       |
+# |-------------------------|       |
+# | 0.000 <> 0.044 |   9976 |       |
+# ===================================
+
+proc count_frames_in_output { buff } {
+  set frames_cntr unknown
+  regexp -line -lineanchor {^\|\s0\.00?0?[ <>0-9.]+\s\|\s*(\d+)} $buff match frames_cntr
+  regexp -line -lineanchor {^\|\s0\.000[ <>0-9.]+\|\s*(\d+)} $buff match frames_cntr
+  return $frames_cntr
+}
+
+proc count_frames { pcap_file {filter FRAMES} } {
+  set log_user_original [log_user -info]
+  log_user 0
+  
+  spawn -noecho tshark -r $pcap_file -q -z io,stat,0,$filter
+  expect {
+    eof {set buff $expect_out(buffer)}
+  }
+
+  log_user $log_user_original
+
+  return [count_frames_in_output $buff]
+}
+
+proc count_stats_in_output { buff } {
+    set found  [regexp -line -lineanchor {^\|\s*0\.0+[ <>0-9.]+\|\s*(\d+)\s\|\s*\d+\s\|\s*(\d+)\s\|\s+\d+\s\|\s+(\d+)\s\|\s+\d+\s\|\s+(\d+)} $buff match ip_frames ip6_frames tcp_frames udp_frames ]
+    if { $found != 1} { return {} }
+    set rlist [list $ip_frames $ip6_frames $tcp_frames $udp_frames]
+    return $rlist
+}
+
+proc count_stats { pcap_file } {
+#    TODO  log_user 0
+    spawn -noecho tshark -r $pcap_file -q -z io,stat,0,ip,ipv6,tcp,udp
+    expect {
+      eof {set buff $expect_out(buffer)}
+    }
+    count_stats_in_output $buff
+
+}
+
+proc compare_stats { expected_pcap_file result_pcap_file } {
+  global test
+  set log_user_original [log_user -info]
+  log_user 0
+  
+  if { ![file exists $expected_pcap_file] } { 
+   fail "$test - file $expected_pcap_file does not exist"
+  }
+  
+  if { ![file exists $expected_pcap_file] } { 
+   fail "$test - file $result_pcap_file does not exist"
+  }
+  
+  set stats_exp_pcap [count_stats $expected_pcap_file]
+  set stats_out_pcap [count_stats $result_pcap_file]
+  set stats_names {"ip4" "ip6" "tcp" "udp"}
+
+  vputs "\nframes counter:"
+  
+  for {set i 0} {$i < [llength $stats_exp_pcap]} {incr i} {
+    set stat_expected [lindex $stats_exp_pcap $i]
+    set stat_result [lindex $stats_out_pcap $i]
+    
+    vputs " stat [lindex $stats_names $i]: expected - $stat_expected, result - $stat_result"
+    
+    if { $stat_expected != $stat_result} { fail "$test, wrong stat $i; expected: $stat_expected, result: $stat_result"}
+  }
+  
+  log_user $log_user_original
+}
+
+proc test_sudo_nopwd { } {
+  try {
+      set results [exec sudo -nv ]
+      set status 0
+  } trap CHILDSTATUS {results options} {
+      set status [lindex [dict get $options -errorcode] 2]
+  }
+  return $status
+}

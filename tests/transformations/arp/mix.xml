@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pktanon-config>
+  <anonymizations>
+    
+    <packet protocol="ethernet">
+      <field name="mac-source" anon="AnonIdentity" />
+      <field name="mac-dest" anon="AnonIdentity" />
+      <field name="ethertype" anon="AnonIdentity" />
+    </packet>
+    
+    <packet protocol="arp">
+      <field name="hardware-type" anon="AnonIdentity"/>
+      <field name="protocol-type" anon="AnonIdentity"/>
+      <field name="hardware-size" anon="AnonIdentity"/>
+      <field name="protocol-size" anon="AnonIdentity"/>
+      <field name="opcode" anon="AnonConstOverwrite" value="0x0f"/>
+      <field name="sender-mac" anon="AnonHashSha1"/>
+      <field name="sender-ip" anon="AnonShorten" newlen="2"/>
+      <field name="target-mac" anon="AnonConstOverwrite" value="0xff"/>
+      <field name="target-ip" anon="AnonConstOverwriteRange" range-begin="2" range-length="2" value="0x0a"/>
+    </packet>
+    
+    <packet protocol="payload">
+      <field name="payload" anon="AnonShorten" newlen="0"/>
+    </packet>
+
+  </anonymizations>
+</pktanon-config>

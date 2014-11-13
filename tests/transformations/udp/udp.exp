@@ -1,0 +1,10 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "UDP"
+
+if { ![exec_pktanon mix.xml udp.pcap] } { break; }
+
+test_field "udp.srcport"  43690 
+test_field "udp.dstport"  48059 
+test_field "udp.length"   8 
+test_field "udp.checksum" "0x19a4" 
+test_checksum "udp" 

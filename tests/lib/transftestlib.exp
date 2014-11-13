@@ -1,0 +1,101 @@
+proc vputs { msg } {
+  global verbose
+  if { $verbose > 0 } {
+    puts $msg
+  }  
+}
+
+proc exec_pktanon { anon_profile in_file } {
+  global test
+  global PKTANON
+  
+  set base_dir [file dirname [info script]]
+  set anon_profile [file join $base_dir $anon_profile]
+  set in_file [file join $base_dir $in_file]
+  set out_file [file join $base_dir ../out.pcap]
+  
+  spawn $PKTANON -c $anon_profile $in_file $out_file
+  expect {
+    "complete" { expect eof; vputs "\n"; return 1}
+    eof {
+      fail "$test: pktanon failed to run"
+      return 0
+    }
+  }  
+}
+
+proc test_field {field value} {
+  global test
+  global verbose
+  set log_user_original [log_user -info]
+  log_user 0
+  
+  set base_dir [file dirname [info script]]
+  set out_file [file join $base_dir ../out.pcap]
+  
+  if { [string first 0x $value ] == 0 } {
+    set value [expr $value]
+  }
+  
+  
+  spawn -noecho tshark -T fields -e $field -o tcp.analyze_sequence_numbers:False -r $out_file
+  expect {
+    $value { 
+      wait
+      vputs "PASS: $test $field = $value"
+      pass "$test $field"
+      }
+    eof {
+      fail "$test: test for field $field failed: \n expected: $value\n actual: $expect_out(buffer)"
+    }
+  }
+  
+  log_user $log_user_original
+}
+
+proc test_checksum {proto} {
+  global test
+  global verbose
+  set log_user_original [log_user -info]
+  log_user 0
+  
+  set base_dir [file dirname [info script]]
+  set out_file [file join $base_dir ../out.pcap]
+  
+  spawn -noecho tshark -T fields -e $proto.checksum_good -o tcp.check_checksum:True -r $out_file
+  expect {
+    "1" {
+      vputs "PASS: $test $proto.checksum_good" 
+      pass "$test $proto.checksum_good\n"
+    }
+    "0" {
+      fail "$test: test for $proto.checksum failed: checksum is bad\n"
+    }
+  
+  }
+  
+  log_user $log_user_original
+}
+
+proc test_checksum_r {proto} {
+  global test
+  global verbose
+  set log_user_original [log_user -info]
+  log_user 0
+  
+  set base_dir [file dirname [info script]]
+  set out_file [file join $base_dir ../out.pcap]
+  
+  spawn tshark -T fields -e $proto.checksum_bad -o tcp.check_checksum:True -r $out_file
+  expect {
+    "0" {
+      vputs "PASS: $test !$proto.checksum_bad"   
+      pass "$test $proto.checksum_good\n"
+    }
+    "1" {
+      fail "$test: test for !$proto.checksum_bad failed: checksum is bad\n"
+    }
+  }
+  
+  log_user $log_user_original
+}

@@ -1,0 +1,20 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "IP-IDEN"
+
+if { ![exec_pktanon iden.xml ip.pcap] } { break; }
+
+test_field "ip.version" 4 
+test_field "ip.hdr_len" 20 
+test_field "ip.dsfield" 0
+test_field "ip.len" 20
+test_field "ip.id" 0x0edf 
+test_field "ip.flags" 0x02
+test_field "ip.frag_offset" 0 
+test_field "ip.ttl" 64 
+test_field "ip.proto" 6 
+test_field "ip.checksum" 0x1d49 
+
+test_checksum "ip"
+
+test_field "ip.src" "192.168.127.128" 
+test_field "ip.dst" "173.194.32.209" 

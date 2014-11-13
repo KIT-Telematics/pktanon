@@ -1,0 +1,69 @@
+#
+# test libpcap-capture - libpcap-inject combination
+#
+
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/runtimetestlib.exp"]
+
+set_test [info script] 
+
+### file - libpcap-life ############################################
+
+# start tshark
+spawn -noecho sudo tshark -i lo -q -z io,stat,0
+expect "Loopback"
+# doesn't work without it
+sleep 2
+set tshark_spawn_id $spawn_id
+
+# start pktanon
+spawn sudo $PKTANON -c $anon_profile -i lo -n lo $trace_file
+set pktanon_spawn_id $spawn_id
+
+# start tcpreplay, send trace_file on lo and count the packets sent
+log_user 0
+spawn sudo tcpreplay -i lo -t -l 1 $trace_file
+expect {
+  -re "Successful packets:\[ \]*(\[0-9\]+)" { set pkts_sent [expr { $expect_out(1,string) }]; wait; }
+  eof { 
+    set pkts_sent unknown
+    unsupported "$test - failed to send packets with tcpreplay"
+   }
+}
+
+# interrupt pktanon and count packets sent
+sleep 0
+log_user $log_user_original
+set spawn_id $pktanon_spawn_id
+
+send \x03
+
+expect {
+  -re "processed packets:\[ \]*(\[0-9\]+)" { set pkts_processed [expr { $expect_out(1,string) }]; wait; }
+  eof {fail "$test pktanon failed"; break; }
+  timeout {fail "$test pktanon failed"; break;}
+}
+
+log_user 0
+set spawn_id $tshark_spawn_id
+# doesn't work without it
+sleep 2
+
+send \x03
+send \x03
+expect eof
+
+set pkts_captured [count_frames_in_output $expect_out(buffer)]
+
+## for some reasons pktanon processes twice the number of pkts being sent
+## and doesn't go into infinite loop
+if { $verbose > 0} {
+  puts "\npkts sent = $pkts_sent"
+  puts "pkts processed = $pkts_processed"
+  puts "pkts captured = $pkts_captured"
+}
+
+if { $pkts_processed < $pkts_sent} { fail " pktanon didn't process enough packets"}
+if { $pkts_captured < ($pkts_sent + $pkts_processed) } { fail " pktanon didn't sent enough packets on output interface"}
+
+log_user $log_user_original

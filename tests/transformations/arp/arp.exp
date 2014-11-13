@@ -1,0 +1,14 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ARP"
+
+if { ![exec_pktanon mix.xml arp.pcap] } { break; }
+
+test_field "arp.hw.type"  1
+test_field "arp.proto.type"  0x0800
+test_field "arp.hw.size"  6
+test_field "arp.proto.size"  4
+test_field "arp.opcode"  3855
+test_field "arp.src.hw_mac"  "f7:28:b2:8a:32:13"
+test_field "arp.src.proto_ipv4"  "192.168.0.0"
+test_field "arp.dst.hw_mac"  "ff:ff:ff:ff:ff:ff"
+test_field "arp.dst.proto_ipv4"  "192.168.10.10"

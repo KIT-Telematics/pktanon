@@ -1,0 +1,14 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "TCP"
+
+if { ![exec_pktanon mix.xml tcp.pcap] } { break; }
+
+test_field "tcp.srcport"  257 
+test_field "tcp.dstport"  514 
+test_field "tcp.seq"   50529027 
+test_field "tcp.ack"   67372036 
+test_field "tcp.hdr_len" 20 
+test_field "tcp.flags" 0x0018 
+test_field "tcp.window_size_value" 1285 
+test_field "tcp.checksum" 0x8afa 
+test_checksum "tcp" 

@@ -1,0 +1,22 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "IP"
+
+if { ![exec_pktanon mix.xml ip.pcap] } { break; }
+
+test_field "ip.version" 4 
+test_field "ip.hdr_len" 20 
+test_field "ip.dsfield" 0
+test_field "ip.len" 20
+test_field "ip.id" 0x0101 
+test_field "ip.flags" 0x07
+test_field "ip.frag_offset" 0 
+test_field "ip.ttl" 2 
+test_field "ip.proto" 6 
+test_field "ip.checksum" 0xd7e3 
+
+test_checksum "ip"
+
+test_field "ip.src" "240.240.240.240" 
+test_field "ip.dst" "15.15.15.15" 
+
+warning "TODO: flags are not transformed correctly"

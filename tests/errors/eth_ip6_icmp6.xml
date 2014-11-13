@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pktanon-config>
+  <anonymizations>
+    
+    <packet protocol="ethernet">
+      <field name="mac-source" anon="AnonIdentity" />
+      <field name="mac-dest" anon="AnonIdentity" />
+      <field name="ethertype" anon="AnonIdentity" />
+    </packet>
+    
+    <packet protocol="ipv6">
+       <field name="traffic-class" anon="AnonIdentity"/>
+       <field name="flow-label" anon="AnonIdentity"/>
+       <field name="next-header"   anon="AnonIdentity"/>
+       <field name="hop-limit" 	anon="AnonIdentity"/>
+       <field name="src-ip" 	anon="AnonIdentity"/>
+       <field name="dest-ip" 	anon="AnonConstOverwrite" value="0xcd"/>
+    </packet>
+      
+   <packet protocol="icmpv6">
+      <field name="type" anon="AnonIdentity" />
+      <field name="code" anon="AnonIdentity" />
+      <field name="rest" anon="AnonIdentity" />
+      <field name="target-address" anon="AnonIdentity" />
+    </packet> 
+      
+    <packet protocol="payload">
+      <field name="payload" anon="AnonShorten" newlen="0"/>
+    </packet>
+    
+  </anonymizations>
+</pktanon-config>

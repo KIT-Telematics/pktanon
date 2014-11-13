@@ -1,0 +1,41 @@
+# #
+# # TODO
+# #
+# 
+# set script_dir [file dirname [info script]]
+# source [file join $script_dir "../lib/lib.exp"]
+# # make check runs scripts from another directory, all file pathes are relative to $script_dir
+# set curr_dir [pwd]
+# 
+# cd $script_dir
+# 
+# set_test [info script] 
+# 
+# ## test1:
+# ## run pktanon with default profile
+# set test_passed 1;
+# 
+# spawn ./gzip_pipe.sh $PKTANON
+# expect {
+#   "complete" {
+#       match_io_logs "istream"
+#       match_io_logs "ostream"
+#       expect eof
+#   }
+#   eof {
+#     set test_passed 0
+#     fail "$test: failed running pktanon with default profile"
+#   }
+# }
+# 
+# ## read number of packets and time
+# set packets_iden 0
+# set time_iden 0
+# 
+# regexp {processed packets:\s*(\d+)} $expect_out(buffer) match packets_iden;
+# regexp {\s(\d+)us} $expect_out(buffer) match time_iden;
+# 
+# ## compare stats in trace file and output file
+# compare_stats "trace.pcap" "../out.pcap"
+# 
+# cd $curr_dir

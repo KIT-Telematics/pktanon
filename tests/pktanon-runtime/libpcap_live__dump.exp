@@ -1,0 +1,67 @@
+#
+# test pktanon with live capture by libpcap
+#
+
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/runtimetestlib.exp"]
+
+set_test [info script] 
+
+# test sudo working: ######################################################
+set status [test_sudo_nopwd]
+
+if { $status != 0 } {
+  unsupported "$test: cannot execute sudo without passwords (status = $status)"
+  break
+}
+
+# spawn pktanon: ###########################################################
+spawn sudo $PKTANON -c $anon_profile -i lo -U $out_file
+expect {
+  initialized {
+    match_io_logs "libpcap"
+  }
+  eof {fail "$test pktanon failed to initialize"; break;}
+  timeout {fail "$test pktanon failed to initialize"; break;}
+}
+set pktanon_spawn_id $spawn_id
+
+# send packets to lo using tcpreplay: ######################################
+log_user 0
+spawn sudo tcpreplay -i lo -t -l 1 $trace_file
+expect {
+  -re "Successful packets:\[ \]*(\[0-9\]+)" { set pkts_sent [expr { $expect_out(1,string) }]; wait; }
+  eof { 
+    set pkts_sent unknown
+    unsupported "$test - failed to send packets with tcpreplay"
+   }
+}
+
+# wait some time and terminate pktanon: ##########################################
+sleep 1
+log_user $log_user_original
+set spawn_id $pktanon_spawn_id
+send \x03
+
+expect {
+  -re "processed packets:\[ \]*(\[0-9\]+)" { set pkts_processed [expr { $expect_out(1,string) }]; wait; }
+  eof {fail "$test pktanon failed"}
+  timeout {fail "$test pktanon failed"}
+}
+
+
+# count number of frames in result: ##########################################
+set pkts_rcvd [count_frames $out_file]
+
+# test that pktanon received all the packets: ##########################################
+if { $verbose > 0 } {
+  puts "\n\nnumber of pkts sent  = $pkts_sent"
+  puts "number of pkts rcved = $pkts_rcvd"
+}
+
+if { $pkts_sent == $pkts_rcvd} {pass $test} {
+  fail "$test: expected $pkts_sent packets, actual $pkts_rcvd packets"
+}
+
+# compare some statistics in trace.pcap and out.pcap -> ensure that fields are indeed copied
+compare_stats $trace_file $out_file

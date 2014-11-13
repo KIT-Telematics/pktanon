@@ -1,0 +1,23 @@
+#
+# test for correct messages by mailformed packets
+#
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/errorstestlib.exp"]
+set trace_file [file join $script_dir bad_ip.pcap]
+
+set_test [info script] 
+
+spawn $PKTANON -c $anon_profile $trace_file $out_file
+
+expect_error_in_packet 1 "packet is fragmented"
+expect_error_in_packet 2 "bogus ip4 header length"
+expect_error_in_packet 3 "packet is fragmented"
+expect_error_in_packet 4 "packet is fragmented"
+expect_error_in_packet 5 "packet is fragmented"
+expect_error_in_packet 6 "packet is fragmented"
+expect_error_in_packet 7 "packet is fragmented"
+expect_error_in_packet 8 "bogus ip4 header length"
+expect_error_in_packet 9 "packet is fragmented"
+expect_error_in_packet 10 "packet is fragmented"
+expect_total_errors 10
+wait

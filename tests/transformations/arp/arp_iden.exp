@@ -1,0 +1,14 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ARP-IDEN"
+
+if { ![exec_pktanon iden.xml arp.pcap] } { break; }
+
+test_field "arp.hw.type"  1 
+test_field "arp.proto.type"  0x0800
+test_field "arp.hw.size"  6 
+test_field "arp.proto.size"  4 
+test_field "arp.opcode"  1 
+test_field "arp.src.hw_mac"  "9c:c7:a6:d0:eb:f9" 
+test_field "arp.src.proto_ipv4"  "192.168.178.1" 
+test_field "arp.dst.hw_mac"  "00:00:00:00:00:00" 
+test_field "arp.dst.proto_ipv4"  "192.168.178.20" 

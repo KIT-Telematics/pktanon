@@ -1,0 +1,53 @@
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/anontestlib.exp"]
+
+set test [info script] 
+
+vputs "\n>>> AnonConstOverwrite ========================================\n"
+#0x3a - ascii value for ':'
+set params {"value" "0x3a"} 
+anon_value_test "AnonConstOverwrite" $params "12345" ":::::"
+#0x2b - ascii value for '+'
+set params {"value" "0x2b"} 
+anon_value_test "AnonConstOverwrite" $params "12345678" "++++++++"
+
+vputs "\n>>> AnonConstOverwriteRange ========================================\n"
+set params {"value" "0x3a" "range-begin" "0" "range-length" "9"}
+anon_value_test "AnonConstOverwriteRange" $params "123456789" ":::::::::"
+set params {"value" "0x3a" "range-begin" "5" "range-length" "9"}
+anon_value_test "AnonConstOverwriteRange" $params "123456789" "12345::::"
+set params {"value" "0x3a" "range-begin" "0" "range-length" "5"}
+anon_value_test "AnonConstOverwriteRange" $params "123456789" ":::::6789"
+set params {"value" "0x3a" "range-begin" "5" "range-length" "2"}
+anon_value_test "AnonConstOverwriteRange" $params "123456789" "12345::89"
+
+vputs "\n>>> AnonHashSha1/Sha256 ========================================\n"
+set params {"hex_output" "1"} 
+# echo -n "value" | openssl dgst -sha1
+# (stdin)= f32b67c7e2(6342af42efabc674d441dca0a281c)
+anon_value_test "AnonHashSha1" $params "value" "f32b67c7e2"
+set big_string "aaaa_aaaa_aaaa_aaaa_aaaa_aaaa_aaaa_aaaa_" 
+# echo -n $big_string | openssl dgst -sha1 
+# (stdin)= 48420d4cbbf021d3517bb8aae0dca45be28d344a
+anon_value_test "AnonHashSha1" $params $big_string "48420d4cbbf021d3517bb8aae0dca45be28d344a48420d4cbbf021d3517bb8aae0dca45be28d344a"
+# TODO test wrap hash around on values not multiple of 20
+# echo -n "value" | openssl dgst -sha256
+# (stdin)= cd42404d52(ad55ccfa9aca4adc828aa5800ad9d385a0671fbcbf724118320619)
+anon_value_test "AnonHashSha256" $params "value" "cd42404d52"
+
+vputs "\n>>> AnonIdentity ========================================\n"
+set params {"hex_output" "0"} 
+anon_value_test "AnonIdentity" $params "val" "val"
+anon_value_test "AnonIdentity" $params "bignonceval123" "bignonceval123"
+
+vputs "\n>>> AnonShorten ========================================\n"
+set params {"newlen" "3"}
+anon_value_test "AnonShorten" $params "value" "val"
+set params {"newlen" "0"}
+anon_value_test "AnonShorten" $params "value" ""
+
+# they seem to be impossible to test without whole pktanon, the transformations are not set
+# vputs "\n>>> AnonKnownProtocolHandler ========================================\n"
+# anon_value_test "AnonKnownProtocolHandler" $params "123" "123"
+# vputs "\n>>> AnonKnownEthertypeHandler ========================================\n"
+# anon_value_test "AnonKnownEthertypeHandler" $params "123" "123"

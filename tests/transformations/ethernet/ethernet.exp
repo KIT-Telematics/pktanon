@@ -1,0 +1,9 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ETHERNET"
+
+if { ![exec_pktanon mix.xml ethernet.pcap] } { break; }
+
+test_field "eth.dst"  "58:86:c5:c2:a1:f3" 
+test_field "eth.src"  "ab:ab:ab:ab:ab:ab" 
+test_field "eth.type" 0x0806
+

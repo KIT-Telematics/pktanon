@@ -1,0 +1,10 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "UDP-IDEN"
+
+if { ![exec_pktanon iden.xml udp.pcap] } { break; }
+
+test_field "udp.srcport"  53 
+test_field "udp.dstport"  45469 
+test_field "udp.length"   8 
+test_field "udp.checksum" "0xce37" 
+test_checksum "udp" 

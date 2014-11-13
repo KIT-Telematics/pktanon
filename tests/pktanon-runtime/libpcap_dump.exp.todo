@@ -1,0 +1,15 @@
+set test "test libpcap-file-io"
+set pktopts {-c profile_iden.xml -l trace.pcap ../out.pcap}
+
+source common.exp
+
+expect {
+  "total packets: 100" { 
+#     expect { 
+#       -re "elapsed time.us.: (\[0-9\]+)" { set profile_iden [expr { $expect_out(1,string) }] } 
+#     }
+    wait
+    fail " $test; >>  i have no idea how to test if it is libpcap "
+    }
+  eof { fail $test}
+}

@@ -1,0 +1,38 @@
+### initialize variables
+set anon_profile [file join $script_dir  profile.xml]
+set out_file [file join $script_dir .. out.pcap]
+
+set log_user_original [log_user -info]
+
+proc set_test { script_name } {
+  global verbose
+  global test
+  set test [file rootname [ file tail $script_name]]
+  if { [info exists test] && $verbose > 0 } {
+    puts "================== $test =================="
+  }
+}
+
+proc expect_error_in_packet { pkt_num error_text} {
+  global test;
+  
+  if { [catch {
+    expect {
+      "warning: error in packet $pkt_num: $error_text" {}
+    eof {fail "$test on pkt_num = $pkt_num";}
+    }
+  } ] } {fail "$test on pkt_num = $pkt_num";}
+
+}
+
+proc expect_total_errors { total_errors } {
+  global test;
+  
+  if { [catch {
+    expect {
+      -re "errors in packets:.$total_errors" {}
+      eof {fail "$test on total errors = $total_errors";}
+    }
+  } ] } {fail "$test on total errors = $total_errors";}
+
+}

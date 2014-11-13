@@ -1,0 +1,13 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "IP6-IDEN"
+
+if { ![exec_pktanon iden.xml ip6.pcap] } { break; }
+
+test_field "ipv6.version" 6 
+test_field "ipv6.class" 0x000000e0 
+test_field "ipv6.flow" 0x00000000 
+test_field "ipv6.plen" 0
+test_field "ipv6.nxt" 58 
+test_field "ipv6.hlim" 255
+test_field "ipv6.src" "fe80::4255:39ff:fec0:3a80"
+test_field "ipv6.dst" "ff02::1" 

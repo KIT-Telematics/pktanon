@@ -1,0 +1,23 @@
+#
+# test for correct messages by mailformed packets
+#
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/errorstestlib.exp"]
+set trace_file [file join $script_dir bad_udp.pcap]
+
+set_test [info script] 
+
+spawn $PKTANON -c $anon_profile $trace_file $out_file
+
+expect_error_in_packet 1 "bad udp length"
+expect_error_in_packet 2 "bad udp length"
+expect_error_in_packet 3 "bad udp length"
+expect_error_in_packet 4 "bad udp length"
+expect_error_in_packet 5 "bad udp length"
+expect_error_in_packet 6 "bad udp length"
+expect_error_in_packet 7 "bad udp length"
+expect_error_in_packet 8 "bad udp length"
+expect_error_in_packet 9 "bad udp length"
+expect_error_in_packet 10 "bad udp length"
+expect_total_errors 10
+wait

@@ -1,0 +1,13 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ICMP"
+
+if { ![exec_pktanon mix.xml icmp_echo_repl.pcap] } { break; }
+
+test_field "icmp.type"  0 
+test_field "icmp.code"  171
+test_field "icmp.checksum"  "0x0359"
+# test_checksum "icmp"
+
+if { $verbose > 0 } { puts "\nThese 2 fields shoul be transformed by 'rest' anon" }
+test_field "icmp.ident" "65021,65021" 
+test_field "icmp.seq"   "65021"

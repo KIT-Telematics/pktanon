@@ -1,0 +1,66 @@
+#
+# test for socket-output (test ip6/udp output)
+#
+
+set script_dir [file dirname [info script]]
+source [file join $script_dir "../lib/runtimetestlib.exp"]
+
+set_test [info script] 
+
+set port 8888
+
+### ipv6 socket (ipv6, tcp) ############################################
+
+log_user 0
+
+# start nmap in ipv4/tcp mode
+spawn -noecho ncat -6 -u -l $port 
+
+# start tshark
+spawn -noecho sudo tshark -i lo -q -z io,stat,0,ip,ipv6,tcp,udp
+expect "Loopback"
+# doesn't work without it
+sleep 2
+set tshark_spawn_id $spawn_id
+
+log_user $log_user_original
+
+# start pktanon
+spawn $PKTANON -c $anon_profile -o ::1:$port -6 -u $trace_file
+
+expect {
+  -re "processed packets:\[ \]*(\[0-9\]+)" { set pkts_sent [expr { $expect_out(1,string) }]; wait; }
+  eof {fail "$test pktanon failed to initialize"; break;}
+  timeout {fail "$test pktanon failed to initialize"; break;}
+}
+
+log_user 0
+set spawn_id $tshark_spawn_id
+# doesn't work without it
+sleep 2
+
+send \x03
+send \x03
+expect eof
+
+set buff $expect_out(buffer)
+set tshark_stats [count_stats_in_output $buff]
+
+set ip_frames [lindex $tshark_stats 0]
+set ip6_frames [lindex $tshark_stats 1]
+set tcp_frames [lindex $tshark_stats 2]
+set udp_frames [lindex $tshark_stats 3]
+
+vputs "\ncaptured sent frames:"
+vputs " stat ip4_frames: expected - none, result - $ip_frames"
+vputs " stat ip6_frames: expected - 100, result - $ip6_frames"
+vputs " stat tcp_frames: expected - none, result - $tcp_frames"
+vputs " stat udp_frames: expected - 100, result - $udp_frames"
+
+
+if {$ip_frames > 0} { fail "$test there should be no ip frames"}
+if {$ip6_frames != 100} { fail "$test there should be ipv6 frames"}
+if {$tcp_frames > 0} { fail "$test there should be no frames"}
+if {$udp_frames != 100} { fail "$test there should be udp frames"}
+
+log_user $log_user_original

@@ -1,0 +1,19 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "IP6-UDP-CHECKSUM"
+
+if { ![exec_pktanon udp_checksum.xml ip6_udp.pcap] } { break; }
+
+test_field "ipv6.version" 6 
+test_field "ipv6.class" 0x00000000 
+test_field "ipv6.flow" 0x00000000 
+test_field "ipv6.plen" 8
+test_field "ipv6.nxt" 17 
+test_field "ipv6.hlim" 1
+test_field "ipv6.src" "fe80::ddc2:d415:27e1:57d2"
+test_field "ipv6.dst" "cdcd:cdcd:cdcd:cdcd:cdcd:cdcd:cdcd:cdcd" 
+
+test_field "udp.srcport"  62857 
+test_field "udp.dstport"  1900 
+test_field "udp.length"   8 
+test_field "udp.checksum" "0x646d" 
+test_checksum "udp" 

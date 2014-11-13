@@ -1,0 +1,16 @@
+source [file join [file dirname [info script]] ../../lib/transftestlib.exp]
+set test "ICMP-IDEN"
+
+if { ![exec_pktanon iden.xml icmp_echo_req.pcap] } { break; }
+
+test_field "icmp.type"  8 
+test_field "icmp.code"  0
+test_field "icmp.checksum"  0xce41
+
+vputs "\nThese 2 fields shoul be transformed by 'rest' anon" 
+
+test_field "icmp.ident"  "10685,48425" 
+# expect ONE at the beginning of the line TODO: end of line
+test_field "icmp.seq"  "^1" 
+
+

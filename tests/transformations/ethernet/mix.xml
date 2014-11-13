@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pktanon-config>
+  <anonymizations>
+    
+    <packet protocol="ethernet">
+      <field name="mac-source" anon="AnonHashSha1" />
+      <field name="mac-dest" anon="AnonConstOverwrite" value="0xab"/>
+      <field name="ethertype" anon="AnonIdentity" />
+    </packet>
+    
+    <packet protocol="payload">
+      <field name="payload" anon="AnonShorten" newlen="0"/>
+    </packet>
+    
+  </anonymizations>
+</pktanon-config>
