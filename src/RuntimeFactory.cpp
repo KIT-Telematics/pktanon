@@ -46,7 +46,7 @@ OutputSource* RuntimeFactory::createOutputSource()
     case OutputType::OSTREAM:
       return new OstreamOutput();
       
-    case OutputType::SOCKET:
+    case OutputType::OSOCKET:
       return new SocketOutput();
       
     default:

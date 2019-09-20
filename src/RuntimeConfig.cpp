@@ -47,7 +47,7 @@ void RuntimeConfig::addOutputFileConfig ( std::string file_name, bool packet_buf
 
 void RuntimeConfig::addOutputSockConfig ( std::string sock_addr, uint16_t sock_port, bool use_ipv6, bool use_udp )
 {
-  output_type = OutputType::SOCKET;
+  output_type = OutputType::OSOCKET;
   output_config = new OutputSocketConfig ( sock_addr, sock_port, use_ipv6, use_udp );
 }
 

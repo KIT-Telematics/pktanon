@@ -19,7 +19,7 @@ enum class InputType
 };
 enum class OutputType
 {
-  UNDEFINED, OSTREAM, LIBPCAP_DUMP, SOCKET, LIBPCAP_INJECT //, RAW_SOCKETS
+  UNDEFINED, OSTREAM, LIBPCAP_DUMP, OSOCKET, LIBPCAP_INJECT //, RAW_SOCKETS
 };
 
 struct default_values
