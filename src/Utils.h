@@ -13,6 +13,11 @@
 #include <PktAnon.h>
 // #include <transformations/ErrorCodes.h>
 
+# ifdef HAVE_LIBPCAP
+
+# include <pcap.h>
+# endif
+
 namespace pktanon
 {
 
@@ -34,8 +39,6 @@ inline void transform_packet ( PCAP_REC_HEADER& record_header, const uint8_t* or
 }
 
 # ifdef HAVE_LIBPCAP
-
-# include <pcap.h>
 
 inline void transform_packet ( struct pcap_pkthdr* pkt_header, const uint8_t* original_packet, uint8_t* transformed_packet, Stats& stats )
 {
