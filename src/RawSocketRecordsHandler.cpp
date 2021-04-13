@@ -13,14 +13,15 @@
 #include "PcapHeaders.h"
 #include "Utils.h"
 
-# include <sys/socket.h>
-# include <netinet/in.h>
-# include <linux/if_ether.h>
-# include <netpacket/packet.h>
-# include <net/if.h>
-# include <sys/ioctl.h>
-# include <fcntl.h>
-# include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <linux/if_ether.h>
+#include <netpacket/packet.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 
 namespace pktanon

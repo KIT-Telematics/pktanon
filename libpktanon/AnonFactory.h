@@ -8,9 +8,10 @@
 #ifndef PKTANON__ANON_FACTORY_H
 #define PKTANON__ANON_FACTORY_H
 
-# include <unordered_map>
-# include <string>
-# include <functional>
+#include <unordered_map>
+#include <string>
+#include <functional>
+#include <stdexcept>
 
 # include "anonprimitives/AnonPrimitive.h"
 #include "Params.h"

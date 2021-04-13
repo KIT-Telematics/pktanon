@@ -8,6 +8,8 @@
 #ifndef PKTANON_IO_UTILS_H
 #define PKTANON_IO_UTILS_H
 
+#include <sys/socket.h>
+
 #include <Stats.h>
 #include <PcapHeaders.h>
 #include <PktAnon.h>

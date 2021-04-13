@@ -8,6 +8,7 @@
 # ifndef PKTANON_PARAMS_H
 # define PKTANON_PARAMS_H
 
+# include <stdexcept>
 # include <string>
 # include <unordered_map>
 

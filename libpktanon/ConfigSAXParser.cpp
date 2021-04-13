@@ -68,7 +68,7 @@ const size_t e_field = 152;
 const size_t e_anon = 184;
 
 
-void ConfigParserHandler::startElement ( const XMLCh* const uri, const XMLCh* const localname, const XMLCh* const qname, const xercesc_3_1::Attributes& attrs )
+void ConfigParserHandler::startElement ( const XMLCh* const uri, const XMLCh* const localname, const XMLCh* const qname, const Attributes& attrs )
 {
   XMLString::lowerCase ( const_cast<XMLCh*> ( localname ) );
   size_t element =  XMLString::hash ( localname,  element_hash_base );
