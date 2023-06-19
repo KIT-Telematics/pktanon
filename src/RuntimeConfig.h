@@ -9,6 +9,7 @@
 #define PKTANON_RUNTIMECONFIG_H
 
 #include <string>
+#include <cstdint>
 
 namespace pktanon
 {

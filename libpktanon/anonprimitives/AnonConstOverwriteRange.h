@@ -9,6 +9,7 @@
 #define PKTANON__ANONCONSTOVERWRITERANGE_H
 
 #include "AnonPrimitive.h"
+#include <cstdint>
 
 namespace pktanon
 {
