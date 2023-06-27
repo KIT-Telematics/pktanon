@@ -9,6 +9,7 @@
 #include "AnonFactory.h"
 #include <algorithm>
 #include <string.h>
+#include <cstdint>
 
 namespace pktanon
 {

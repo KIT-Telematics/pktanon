@@ -9,6 +9,7 @@
 #define PKTANON__ANON_HASH_HMAC_SHA1_H
 
 #include "AnonPrimitive.h"
+#include <cstdint>
 
 namespace pktanon
 {

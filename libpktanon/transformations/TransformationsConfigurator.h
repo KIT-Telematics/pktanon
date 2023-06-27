@@ -11,6 +11,7 @@
 # include <string>
 # include <functional>
 # include <unordered_map>
+# include <cstdint>
 
 # include <PktAnonConfig.h>
 
