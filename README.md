@@ -26,9 +26,15 @@ can also be easily extended with new anonymization primitives and new packets.
         cd pktanon
         ./bootstrap
         ./configure
-        ./make
+        make
 
-3. PktAnon executable will be pktanon file in the project directory
+3. PktAnon executable will be `pktanon` file in the project directory
+
+### Build requirements
+
+In Debian-based distribution, you can install the build dependencies using this command:
+
+        apt-get install build-essential autoconf libxerces-c-dev nettle-dev libpcap-dev libboost-dev
 
 ## Documentation
 
